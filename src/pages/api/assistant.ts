@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { GoogleGenAI } from '@google/genai';
 import { getProducts } from '../../lib/products';
 import { buildSystemPrompt } from '../../lib/assistant-prompt';
 import type { AssistantRequest } from '../../types/chat';
@@ -17,51 +18,36 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    const baseUrl = import.meta.env.ANTHROPIC_BASE_URL ?? 'https://generativelanguage.googleapis.com/v1beta/openai';
-    
-    const apiKey = import.meta.env.PUBLIC_GEMINI_API_KEY
-    
-    const model = import.meta.env.ANTHROPIC_MODEL ?? 'gemini-2.5-flash';
+    const apiKey = import.meta.env.PUBLIC_GEMINI_API_KEY;
 
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'Gemini API key configuration is missing.' }), {
+      return new Response(JSON.stringify({ error: 'Production PUBLIC_GEMINI_API_KEY is missing.' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
+    const ai = new GoogleGenAI({ apiKey });
+
     const products = await getProducts();
     const systemPrompt = buildSystemPrompt(products);
 
-    const targetUrl = `${baseUrl}/chat/completions`;
+    const contents = body.messages.map((msg) => ({
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content }],
+    }));
 
-    const llmResponse = await fetch(targetUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages: [{ role: 'system', content: systemPrompt }, ...body.messages],
+    const aiResponse = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: contents,
+      config: {
+        systemInstruction: systemPrompt,
         temperature: 0.7,
-        max_tokens: 1024,
-      }),
+        maxOutputTokens: 1024,
+      },
     });
 
-    if (!llmResponse.ok) {
-      const detail = await llmResponse.text();
-      console.error('Gemini API native error:', llmResponse.status, detail);
-      return new Response(
-        JSON.stringify({
-          error: 'Assistant configuration error or service is temporarily unavailable.',
-        }),
-        { status: 502, headers: { 'Content-Type': 'application/json' } },
-      );
-    }
-
-    const data = await llmResponse.json();
-    const reply = data.choices?.[0]?.message?.content?.trim();
+    const reply = aiResponse.text?.trim();
 
     if (!reply) {
       return new Response(JSON.stringify({ error: 'Empty response from assistant.' }), {
@@ -75,10 +61,10 @@ export const POST: APIRoute = async ({ request }) => {
         reply,
         productIds: extractProductIds(reply),
       }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } },
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Assistant API error:', error);
+    console.error('Assistant API Error:', error);
     return new Response(JSON.stringify({ error: 'Unexpected assistant error.' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
