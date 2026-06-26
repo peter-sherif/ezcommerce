@@ -1,0 +1,7 @@
+[build]
+  command = "npm run build"
+  publish = ".netlify/functions-internal"
+
+[dev]
+  command = "npm run dev"
+  targetPort = 4321
