@@ -17,7 +17,7 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    const baseUrl = import.meta.env.ANTHROPIC_BASE_URL ?? 'https://generativelanguage.googleapis.com/v1beta';
+    const baseUrl = import.meta.env.ANTHROPIC_BASE_URL ?? 'https://generativelanguage.googleapis.com/v1beta/openai';
     
     const apiKey = import.meta.env.PUBLIC_GEMINI_API_KEY
     
@@ -33,12 +33,13 @@ export const POST: APIRoute = async ({ request }) => {
     const products = await getProducts();
     const systemPrompt = buildSystemPrompt(products);
 
-    const targetUrl = `${baseUrl}/chat/completions?key=${apiKey}`;
+    const targetUrl = `${baseUrl}/chat/completions`;
 
     const llmResponse = await fetch(targetUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model,
