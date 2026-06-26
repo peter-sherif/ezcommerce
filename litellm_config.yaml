@@ -2,4 +2,4 @@ model_list:
   - model_name: gemini-2.5-flash
     litellm_params:
       model: gemini/gemini-2.5-flash
-      api_key: "${PUBLIC_GEMINI_API_KEY}"
+      api_key: "os.environ/PUBLIC_GEMINI_API_KEY"
