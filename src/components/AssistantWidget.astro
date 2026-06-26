@@ -1,0 +1,369 @@
+---
+import type { Product } from '../types/product';
+
+interface Props {
+  products: Product[];
+}
+
+const { products } = Astro.props;
+---
+
+<div id="assistant-root" class="assistant-root" data-products={JSON.stringify(products)}>
+  <button
+    type="button"
+    class="assistant-toggle"
+    data-assistant-toggle
+    aria-expanded="false"
+    aria-controls="assistant-panel"
+    aria-label="Open shopping assistant"
+  >
+    <span class="assistant-toggle-icon" aria-hidden="true">✦</span>
+    <span class="assistant-toggle-label">Stylist</span>
+  </button>
+
+  <div id="assistant-panel" class="assistant-panel" data-assistant-panel hidden>
+    <header class="assistant-header">
+      <div>
+        <h2 class="assistant-title">Shopping assistant</h2>
+        <p class="assistant-subtitle">Curated picks, just for you</p>
+      </div>
+      <button type="button" class="assistant-close" data-assistant-close aria-label="Close assistant">
+        &times;
+      </button>
+    </header>
+
+    <div class="assistant-prompts" data-assistant-prompts role="group" aria-label="Quick prompts"></div>
+
+    <div class="assistant-messages" data-assistant-messages role="log" aria-live="polite" aria-relevant="additions"></div>
+
+    <form class="assistant-form" data-assistant-form>
+      <textarea
+        data-assistant-input
+        class="assistant-input"
+        placeholder="Describe what you're looking for…"
+        rows="2"
+        aria-label="Message to shopping assistant"
+      ></textarea>
+      <button type="submit" class="btn btn-primary assistant-send" data-assistant-send aria-label="Send message">
+        Send
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  import '../scripts/assistant.ts';
+</script>
+
+<style is:global>
+  .assistant-root {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 9000;
+    font-family: var(--font-sans);
+  }
+
+  .assistant-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: var(--radius-full);
+    background: var(--color-accent);
+    color: white;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(45, 90, 74, 0.35);
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+
+  .assistant-toggle:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(45, 90, 74, 0.4);
+  }
+
+  .assistant-toggle-icon {
+    font-size: 1.1rem;
+  }
+
+  .assistant-panel {
+    position: absolute;
+    bottom: calc(100% + 0.75rem);
+    right: 0;
+    width: min(calc(100vw - 2rem), 24rem);
+    height: min(calc(100vh - 6rem), 32rem);
+    display: flex;
+    flex-direction: column;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+
+  .assistant-panel[hidden] {
+    display: none;
+  }
+
+  .assistant-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1rem 1rem 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-muted);
+  }
+
+  .assistant-title {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 400;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .assistant-subtitle {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin: 0.2rem 0 0;
+  }
+
+  .assistant-close {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--radius-full);
+    background: transparent;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .assistant-close:hover {
+    background: var(--color-border);
+    color: var(--color-text);
+  }
+
+  .assistant-prompts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.75rem 1rem 0;
+  }
+
+  .assistant-prompt-chip {
+    font-family: inherit;
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.35rem 0.65rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background: var(--color-bg);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .assistant-prompt-chip:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .assistant-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .assistant-message {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 92%;
+  }
+
+  .assistant-message--user {
+    align-self: flex-end;
+  }
+
+  .assistant-message--assistant {
+    align-self: flex-start;
+  }
+
+  .assistant-bubble {
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .assistant-message--user .assistant-bubble {
+    background: var(--color-accent);
+    color: white;
+    border-bottom-right-radius: 0.25rem;
+  }
+
+  .assistant-message--assistant .assistant-bubble {
+    background: var(--color-surface-muted);
+    color: var(--color-text);
+    border-bottom-left-radius: 0.25rem;
+  }
+
+  .assistant-products {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .assistant-product-card {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+  }
+
+  .assistant-product-card img {
+    width: 3rem;
+    height: 3rem;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-muted);
+  }
+
+  .assistant-product-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .assistant-product-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text);
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .assistant-product-name:hover {
+    color: var(--color-accent);
+  }
+
+  .assistant-product-price {
+    font-size: 0.75rem;
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+
+  .assistant-add-btn {
+    font-size: 0.7rem !important;
+    padding: 0.35rem 0.65rem !important;
+  }
+
+  .assistant-typing {
+    align-self: flex-start;
+    display: flex;
+    gap: 0.3rem;
+    padding: 0.65rem 0.85rem;
+    background: var(--color-surface-muted);
+    border-radius: var(--radius-md);
+  }
+
+  .assistant-typing span {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--color-text-muted);
+    animation: assistant-bounce 1.2s infinite ease-in-out;
+  }
+
+  .assistant-typing span:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+
+  .assistant-typing span:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
+  @keyframes assistant-bounce {
+    0%,
+    80%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.4;
+    }
+    40% {
+      transform: translateY(-4px);
+      opacity: 1;
+    }
+  }
+
+  .assistant-form {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .assistant-input {
+    flex: 1;
+    font-family: inherit;
+    font-size: 0.875rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    resize: none;
+    line-height: 1.4;
+    background: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  .assistant-input:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+  }
+
+  .assistant-send {
+    align-self: flex-end;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 480px) {
+    .assistant-root {
+      bottom: 1rem;
+      right: 1rem;
+      left: 1rem;
+    }
+
+    .assistant-panel {
+      width: 100%;
+      right: 0;
+    }
+
+    .assistant-toggle-label {
+      display: none;
+    }
+  }
+</style>

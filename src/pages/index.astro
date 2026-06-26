@@ -1,0 +1,150 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import { getFeaturedProducts } from '../lib/products';
+
+const products = await getFeaturedProducts();
+const categories = [...new Set(products.map((p) => p.category))];
+---
+
+<Layout title="ezcommerce — Curated for You">
+  <section class="hero">
+    <div class="container hero-inner">
+      <p class="hero-eyebrow">Hyper-personalized shopping</p>
+      <h1 class="hero-title">Discover pieces that match your style</h1>
+      <p class="hero-subtitle">
+        A curated collection of apparel, home, and accessories — tap the
+        <strong>Stylist</strong> button to get personalized picks from our AI shopping assistant.
+      </p>
+      <a href="#catalog" class="btn btn-primary btn-lg">Browse collection</a>
+    </div>
+  </section>
+
+  <section id="catalog" class="catalog">
+    <div class="container">
+      <div class="catalog-header">
+        <h2>Featured products</h2>
+        <div class="category-tags" role="list">
+          {categories.map((cat) => (
+            <span class="category-tag" role="listitem">{cat}</span>
+          ))}
+        </div>
+      </div>
+      <div class="product-grid">
+        {products.map((product) => (
+          <ProductCard product={product} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="about">
+    <div class="container about-inner">
+      <h2>AI shopping assistant</h2>
+      <p>
+        Our conversational stylist learns your taste, understands context, and curates outfits,
+        gift ideas, and themed collections. Click <strong>Stylist</strong> in the corner to start
+        chatting — recommended products appear with one-click add-to-cart.
+      </p>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .hero {
+    padding: 5rem 0 4rem;
+    background: linear-gradient(180deg, var(--color-surface-muted) 0%, var(--color-bg) 100%);
+  }
+
+  .hero-inner {
+    max-width: 42rem;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin: 0 0 1rem;
+  }
+
+  .hero-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2.5rem, 6vw, 3.75rem);
+    font-weight: 400;
+    line-height: 1.1;
+    margin: 0 0 1.25rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.125rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin: 0 0 2rem;
+  }
+
+  .catalog {
+    padding: 4rem 0;
+  }
+
+  .catalog-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .catalog-header h2 {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    font-weight: 400;
+    margin: 0;
+  }
+
+  .category-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .category-tag {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.35rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    color: var(--color-text-muted);
+  }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .about {
+    padding: 4rem 0 5rem;
+    background: var(--color-surface-muted);
+  }
+
+  .about-inner {
+    max-width: 40rem;
+  }
+
+  .about-inner h2 {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    font-weight: 400;
+    margin: 0 0 1rem;
+  }
+
+  .about-inner p {
+    font-size: 1.0625rem;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+    margin: 0;
+  }
+</style>

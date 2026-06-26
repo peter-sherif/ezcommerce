@@ -1,0 +1,132 @@
+---
+import type { Product } from '../types/product';
+
+interface Props {
+  product: Product;
+}
+
+const { product } = Astro.props;
+const origin = Astro.url.origin;
+const itemUrl = `${origin}${product.url}`;
+---
+
+<article class="product-card">
+  <div class="product-image-wrap">
+    <img src={product.image} alt={product.name} loading="lazy" width="400" height="400" />
+    <span class="product-category">{product.category}</span>
+  </div>
+  <div class="product-body">
+    <h3 class="product-name">
+      <a href={product.url}>{product.name}</a>
+    </h3>
+    <p class="product-description">{product.description}</p>
+    <div class="product-footer">
+      <span class="product-price">${product.price.toFixed(2)}</span>
+      <button
+        class="snipcart-add-item btn btn-primary"
+        type="button"
+        data-item-id={product.id}
+        data-item-name={product.name}
+        data-item-price={product.price}
+        data-item-url={itemUrl}
+        data-item-image={`${origin}${product.image}`}
+        data-item-description={product.description}
+      >
+        Add to cart
+      </button>
+    </div>
+  </div>
+</article>
+
+<style>
+  .product-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .product-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .product-image-wrap {
+    position: relative;
+    aspect-ratio: 1;
+    background: var(--color-surface-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+
+  .product-image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .product-category {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--color-bg);
+    color: var(--color-text-muted);
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--radius-full);
+  }
+
+  .product-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 1.25rem;
+    gap: 0.5rem;
+  }
+
+  .product-name {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 400;
+    line-height: 1.3;
+    margin: 0;
+  }
+
+  .product-name a {
+    transition: color 0.15s;
+  }
+
+  .product-name a:hover {
+    color: var(--color-accent);
+  }
+
+  .product-description {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    margin: 0;
+    flex: 1;
+  }
+
+  .product-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+
+  .product-price {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+</style>

@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Claude related files
+.claude/
+
+# Playbooks
+PLAYBOOKS/
+
+# Astro Build Outputs & Caches
+.astro/
+dist/
+
+# Netlify local folder
+.netlify/
+
+# .md files
+*.md
+
+# Environment Variables & Secrets (CRITICAL for Snipcart API keys)
+.env
+.env.local
+.env.*.local
+.env.example
+
+# IDEs, Editors & System Files
+.DS_Store
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local test outputs
+coverage/
+.nyc_output/

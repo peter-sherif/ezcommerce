@@ -1,0 +1,147 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import type { Product } from '../../types/product';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('products');
+  return entries.map((entry) => ({
+    params: { id: entry.data.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const origin = Astro.url.origin;
+
+const product: Product = {
+  id: entry.data.id,
+  name: entry.data.name,
+  description: entry.body.trim(),
+  price: entry.data.price,
+  image: entry.data.image,
+  category: entry.data.category,
+  url: `/products/${entry.data.id}/`,
+};
+---
+
+<Layout title={`${product.name} — ezcommerce`} description={product.description}>
+  <article class="product-detail">
+    <div class="container product-detail-inner">
+      <a href="/" class="back-link">&larr; Back to shop</a>
+
+      <div class="product-detail-grid">
+        <div class="product-detail-image">
+          <img src={product.image} alt={product.name} width="600" height="600" />
+        </div>
+
+        <div class="product-detail-info">
+          <span class="product-category">{product.category}</span>
+          <h1>{product.name}</h1>
+          <p class="product-price">${product.price.toFixed(2)}</p>
+          <div class="product-description">
+            <Content />
+          </div>
+          <button
+            class="snipcart-add-item btn btn-primary btn-lg"
+            type="button"
+            data-item-id={product.id}
+            data-item-name={product.name}
+            data-item-price={product.price}
+            data-item-url={`${origin}${product.url}`}
+            data-item-image={`${origin}${product.image}`}
+            data-item-description={product.description}
+          >
+            Add to cart
+          </button>
+        </div>
+      </div>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .product-detail {
+    padding: 2rem 0 5rem;
+  }
+
+  .back-link {
+    display: inline-block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    margin-bottom: 2rem;
+    transition: color 0.15s;
+  }
+
+  .back-link:hover {
+    color: var(--color-accent);
+  }
+
+  .product-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .product-detail-image {
+    background: var(--color-surface-muted);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .product-detail-image img {
+    width: 100%;
+    max-width: 28rem;
+    object-fit: contain;
+  }
+
+  .product-category {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .product-detail-info h1 {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: 400;
+    line-height: 1.2;
+    margin: 0 0 1rem;
+  }
+
+  .product-price {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    margin: 0 0 1.5rem;
+  }
+
+  .product-description {
+    font-size: 1.0625rem;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+    margin-bottom: 2rem;
+  }
+
+  .product-description :global(p) {
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .product-detail-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+</style>

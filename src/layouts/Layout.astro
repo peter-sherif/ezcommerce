@@ -1,0 +1,83 @@
+---
+import AssistantWidget from '../components/AssistantWidget.astro';
+import { getProducts } from '../lib/products';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'ezcommerce',
+  description = 'Hyper-personalized shopping, curated for you.',
+} = Astro.props;
+
+const snipcartApiKey = import.meta.env.PUBLIC_SNIPCART_API_KEY ?? '';
+const products = await getProducts();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+    {
+      snipcartApiKey && (
+        <link rel="stylesheet" href="https://cdn.snipcart.com/themes/v3.7.1/default/snipcart.css" />
+      )
+    }
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href="/" class="logo">
+          <span class="logo-mark">ez</span>
+          <span class="logo-text">commerce</span>
+        </a>
+        <nav class="site-nav" aria-label="Main">
+          <a href="/">Shop</a>
+          <a href="#about">About</a>
+        </nav>
+        <button class="snipcart-checkout cart-button" type="button">
+          <span class="cart-icon" aria-hidden="true">🛒</span>
+          <span>Cart</span>
+          <span class="snipcart-items-count cart-count"></span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>&copy; {new Date().getFullYear()} ezcommerce. Curated with care.</p>
+      </div>
+    </footer>
+
+    {
+      snipcartApiKey && (
+        <>
+          <div hidden id="snipcart" data-api-key={snipcartApiKey} data-config-modal-style="side" />
+          <script src="https://cdn.snipcart.com/themes/v3.7.1/default/snipcart.js" defer />
+        </>
+      )
+    }
+
+    <AssistantWidget products={products} />
+  </body>
+</html>
+
+<style is:global>
+  @import '../styles/global.css';
+</style>
