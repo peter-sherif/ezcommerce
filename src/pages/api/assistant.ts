@@ -17,18 +17,28 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    const baseUrl = import.meta.env.ANTHROPIC_BASE_URL ?? 'http://localhost:4000';
-    const apiKey = import.meta.env.ANTHROPIC_API_KEY ?? 'DUMMY_KEY';
+    const baseUrl = import.meta.env.ANTHROPIC_BASE_URL ?? 'https://generativelanguage.googleapis.com/v1beta';
+    
+    const apiKey = import.meta.env.PUBLIC_GEMINI_API_KEY
+    
     const model = import.meta.env.ANTHROPIC_MODEL ?? 'gemini-2.5-flash';
+
+    if (!apiKey) {
+      return new Response(JSON.stringify({ error: 'Gemini API key configuration is missing.' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
     const products = await getProducts();
     const systemPrompt = buildSystemPrompt(products);
 
-    const llmResponse = await fetch(`${baseUrl}/v1/chat/completions`, {
+    const targetUrl = `${baseUrl}/chat/completions?key=${apiKey}`;
+
+    const llmResponse = await fetch(targetUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model,
@@ -40,10 +50,10 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (!llmResponse.ok) {
       const detail = await llmResponse.text();
-      console.error('LiteLLM error:', llmResponse.status, detail);
+      console.error('Gemini API native error:', llmResponse.status, detail);
       return new Response(
         JSON.stringify({
-          error: 'Assistant is temporarily unavailable. Is LiteLLM running on port 4000?',
+          error: 'Assistant configuration error or service is temporarily unavailable.',
         }),
         { status: 502, headers: { 'Content-Type': 'application/json' } },
       );
